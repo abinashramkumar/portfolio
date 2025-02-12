@@ -3,24 +3,156 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Personal portfolio</title>
-    <link rel="stylesheet" href="style.css">
+    <title>To-Do List</title>
+    <link rel="stylesheet" href="index.css">
+    <link rel="icon" href="profile.png">
+    
 </head>
 <body>
-    <div id="header"> 
-        <div class="container">
-            <nav>
-                <img src="images/logo 1.png" alt="logo">
-                <ul>
-                    <li><a href="#">home</a></li>
-                    <li><a href="#">about</a></li>
-                    <li><a href="#">Services</a></li>
-                    <li><a href="#">portfolio</a></li>
-                    <li><a href="#">contact</a></li>
-                </ul>
-            </nav>
+
+    <div class="container">
+        <div class="header">
+            <h1>To-Do List</h1>
+        </div>
+
+        <input type="text" id="new-task" placeholder="Add a New Task, then press Enter">
+        <button onclick="addTask()">Add</button>
+
+        <div class="filter-buttons">
+            <button class="active" data-filter="all">All</button>
+            <button data-filter="pending">Pending</button>
+            <button data-filter="completed">Completed</button>
+            <button data-filter="clear">Clear All</button>
+        </div>
+
+        <ul id="task-list">
+        </ul>
+
+        <div id="no-tasks-message">
+            You don't have any task here
+        </div>
+
+    </div>
+
+    <div id="completionModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <p>🎉 Task Completed! 🎉</p>
         </div>
     </div>
-    
+
+
+    <script>
+        const taskList = document.getElementById('task-list');
+        const newTaskInput = document.getElementById('new-task');
+        const noTasksMessage = document.getElementById('no-tasks-message');
+        const filterButtons = document.querySelectorAll('.filter-buttons button');
+        const completionModal = document.getElementById('completionModal');
+
+        let tasks = [];
+
+        function addTask() {
+            const taskText = newTaskInput.value.trim();
+            if (taskText !== "") {
+                tasks.push({ text: taskText, completed: false });
+                renderTasks();
+                newTaskInput.value = "";
+            }
+        }
+
+        function renderTasks(filter = 'all') {
+            taskList.innerHTML = '';
+
+            const filteredTasks = tasks.filter(task => {
+                if (filter === 'all') return true;
+                if (filter === 'pending') return !task.completed;
+                if (filter === 'completed') return task.completed;
+                return true;
+            });
+
+            filteredTasks.forEach(task => {
+                const li = document.createElement('li');
+                li.textContent = task.text;
+                if (task.completed) {
+                    li.classList.add('completed');
+                }
+
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.checked = task.completed;
+                checkbox.addEventListener('change', () => {
+                    task.completed = checkbox.checked;
+                    renderTasks(filter);
+                    if (task.completed) {
+                        openModal();
+                    }
+                });
+                li.prepend(checkbox);
+
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = 'Delete';
+                deleteButton.classList.add('delete');
+                deleteButton.addEventListener('click', () => {
+                    tasks = tasks.filter(t => t !== task);
+                    renderTasks(filter);
+                });
+                li.appendChild(deleteButton);
+
+                taskList.appendChild(li);
+            });
+
+            toggleNoTasksMessage();
+        }
+
+        function toggleNoTasksMessage() {
+            noTasksMessage.style.display = tasks.length === 0 ? 'block' : 'none';
+        }
+
+        filterButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const filter = button.dataset.filter;
+
+                filterButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+
+                if (filter === 'clear') {
+                    tasks = [];
+                }
+
+                renderTasks(filter);
+            });
+        });
+      function openModal() {
+            const modalContent = document.querySelector("#completionModal .modal-content");
+            modalContent.innerHTML = `
+                <span class="close" onclick="closeModal()">&times;</span>
+                <p>🎉 Task Completed! 🎉</p>
+                <p>✨ You're doing great! ✨</p>  
+            `;
+            completionModal.style.display = "block";
+        }
+        function closeModal() {
+            completionModal.style.display = "none";
+        }
+
+        window.onclick = function(event) {
+            if (event.target == completionModal) {
+                closeModal();
+            }
+        }
+        renderTasks();
+    </script>
+    <footer>
+        <div class="footer-content">
+            <div class="copyright">
+                &copy;   2025  All rights reserved by Abinash R 
+                
+            </div>  
+            </div>
+           
+        </div>
+    </footer>
+    </body>
+    </html>
 </body>
 </html>
